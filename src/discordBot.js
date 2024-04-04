@@ -1,5 +1,14 @@
 import { Client,GatewayIntentBits,GuildMember } from 'discord.js'
 import { configDotenv, parse } from 'dotenv'
+import youtube from 'ytdl-core'
+import 'yt-search'
+import yts from 'yt-search'
+import Queue from './components/Queue'
+
+const songQueue = new Queue()
+
+
+const { getInfo} = youtube
 
 configDotenv()
 
@@ -44,7 +53,20 @@ const parseMessage = async (message)=>{
 }
 
 const musicSearch = async (query)=>{
+    // getInfo(query).then((info)=>{
+    //     console.log(info)
+    // })
+    const res = await yts('Odd Look')
+    const metadata = await getInfo(res.videos[0].url)
+    const song = {
+        title:metadata.videoDetails.title,
+        url:metadata.videoDetails.video_url,
+        length:metadata.videoDetails.lengthSeconds
+    }
 
+    songQueue.enqueue(song)
+    console.log(songQueue)
+    
 }
 
 const playLink = async (link)=>{
