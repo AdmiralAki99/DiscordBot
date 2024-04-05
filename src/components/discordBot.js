@@ -27,24 +27,12 @@ const client = new Client({intents:[
 const deployCommands = async (message)=>{
     await message.guild.commands.set([
         {
-            name:'ys',
+            name:'play',
             description:"Search for a song on youtube",
             options:[
                 {
                     name:'query',
                     description:'The song you want to search for',
-                    type:3,
-                    required:true
-                }
-            ]
-        },
-        {
-            name:'yl',
-            description:"Play a song from youtube link",
-            options:[
-                {
-                    name:'query',
-                    description:'The song link you want to play',
                     type:3,
                     required:true
                 }
@@ -90,10 +78,17 @@ const skipSong = async (interaction)=>{
 
 
 const musicSearch = async (query)=>{
-    const res = await yts(query)
     const metadata = await play.search(query, { limit: 1 })
 
     const song = new Song(metadata[0].title,metadata[0].channel.name,metadata[0].durationInSec,metadata[0].url,metadata[0].thumbnails[0].url)
+
+    return song
+}
+
+const linkSearch = async (link)=>{
+    const metadata = await play.video_info(link)
+
+    const song = new Song(metadata.video_details.title,metadata.video_details.channel.name,metadata.video_details.durationInSec,metadata.video_details.url,metadata.video_details.thumbnails[0].url)
 
     return song
 }
@@ -236,24 +231,37 @@ client.on('interactionCreate', async (interaction)=>{
 
     const {commandName,options} = interaction
 
-    if(commandName === 'ys'){
+    if(commandName === 'play'){
         const query = options.getString('query')
 
-        let song = await musicSearch(query)
-
-        if(songQueue.size() === 0){
-            interaction.reply(`Playing ${song.title} by ${song.artist}`)
-            await addToQueue(song)
-            await playSongFromQueue(interaction)
+        if(query.includes('https://')){
+            let song = await linkSearch(query)
+            if(songQueue.size() === 0){
+                interaction.reply(`Playing ${song.title}`)
+                await addToQueue(song)
+                await playSongFromQueue(interaction)
+            }else{
+                await addToQueue(song)
+                interaction.reply(`Added ${song.title} to queue`)
+            }
         }else{
-            await addToQueue(song)
-            interaction.reply(`Added ${song.title} by ${song.artist} to queue`)
+            let song = await musicSearch(query)
+
+            if(songQueue.size() === 0){
+                interaction.reply(`Playing ${song.title} by ${song.artist}`)
+                await addToQueue(song)
+                await playSongFromQueue(interaction)
+            }else{
+                await addToQueue(song)
+                interaction.reply(`Added ${song.title} by ${song.artist} to queue`)
+            }
         }
+       
+
+       
     }
     if(commandName === 'yl'){
-        const query = options.getString('query')
-       await playLink(query)
-       await playSongFromQueue()
+        
     }
 
     if(commandName === 'ctrls'){
