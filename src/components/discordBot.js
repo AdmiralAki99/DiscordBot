@@ -52,6 +52,10 @@ class DiscordBot{
             {
                 name:'skip',
                 description:"Skip the current song"
+            },
+            {
+                name:'stop',
+                description:"Stop the music player"
             }
         ])
     }
@@ -73,6 +77,12 @@ class DiscordBot{
     skipSong = async (interaction)=>{
         this.musicPlayer.stop()
         interaction.reply(`Song skipped by ${interaction.user.username}`)
+    }
+
+    stopPlayer = async (interaction)=>{
+        this.musicPlayer.stop()
+        interaction.reply(`Playback stopped by ${interaction.user.username}`)
+        this.songQueue.clearQueue()
     }
     
     musicSearch = async (query)=>{
@@ -317,6 +327,10 @@ class DiscordBot{
         
             if(commandName === 'skip'){
                 this.skipSong(interaction)
+            }
+
+            if(commandName === 'stop'){
+                this.stopPlayer(interaction)
             }
         })
 
