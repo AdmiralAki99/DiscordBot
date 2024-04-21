@@ -44,6 +44,10 @@ class Queue {
     getQueue(){
         return this.items
     }
+
+    clearQueue(){
+        this.items = []
+    }
   }
 
 export {Queue}
