@@ -85,29 +85,29 @@ class DiscordBot{
         this.songQueue.clearQueue()
     }
     
-    musicSearch = async (query)=>{
+    musicSearch = async (query,interaction)=>{
         const metadata = await play.search(query, { limit: 1 })
     
-        const song = new Song(metadata[0].title,metadata[0].channel.name,metadata[0].durationInSec,metadata[0].url,metadata[0].thumbnails[0].url)
+        const song = new Song(metadata[0].title,metadata[0].channel.name,metadata[0].durationInSec,metadata[0].url,metadata[0].thumbnails[0].url,interaction.user.username)
     
         return song
     }
 
-    linkSearch = async (link)=>{
+    linkSearch = async (link,interaction)=>{
         const metadata = await play.video_info(link)
     
-        const song = new Song(metadata.video_details.title,metadata.video_details.channel.name,metadata.video_details.durationInSec,metadata.video_details.url,metadata.video_details.thumbnails[0].url)
+        const song = new Song(metadata.video_details.title,metadata.video_details.channel.name,metadata.video_details.durationInSec,metadata.video_details.url,metadata.video_details.thumbnails[0].url,interaction.user.username)
     
         return song
     }
 
-    playlistSearch = async (playlistLink)=>{
+    playlistSearch = async (playlistLink,interaction)=>{
         const listID = playlistLink.split('list=')[1]
         const playlist = await yts({listId: listID})
         const songList = []
     
         const searchPromise = playlist.videos.map(async (video)=>{
-            return this.musicSearch(video.title)
+            return this.musicSearch(video.title,interaction)
         })
 
         const songs = await Promise.all(searchPromise)
@@ -268,7 +268,7 @@ class DiscordBot{
         
                 if(query.includes('https://')){
                     if (query.includes('list=')){
-                        let songs = await this.playlistSearch(query)
+                        let songs = await this.playlistSearch(query,interaction)
                         if( this.songQueue.size() === 0){
                             interaction.reply(`Playing playlist`)
                             songs.forEach(async (song)=>{
@@ -282,7 +282,7 @@ class DiscordBot{
                             interaction.reply(`Added playlist to queue`)
                         }
                     }else{
-                        let song = await  this.linkSearch(query)
+                        let song = await  this.linkSearch(query,interaction)
                         if( this.songQueue.size() === 0){
                             interaction.reply(`Playing ${song.title}`)
                             await  this.addToQueue(song)
@@ -294,7 +294,7 @@ class DiscordBot{
                     }
                     
                 }else{
-                    let song = await  this.musicSearch(query)
+                    let song = await  this.musicSearch(query,interaction)
         
                     if( this.songQueue.size() === 0){
                         interaction.reply(`Playing ${song.title} by ${song.artist}`)
