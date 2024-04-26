@@ -6,6 +6,7 @@ import 'yt-search'
 import yts from 'yt-search'
 import {Queue} from './queue.js'
 import { Song } from './Song.js'
+import {rollDice} from './diceparser.js'
 
 configDotenv()
 
@@ -56,6 +57,18 @@ class DiscordBot{
             {
                 name:'stop',
                 description:"Stop the music player"
+            },
+            {
+                name:'roll',
+                description:"Roll a dice ex: 1D6",
+                options:[
+                    {
+                        name:'query',
+                        description:'The dice type you want to roll',
+                        type:3,
+                        required:true
+                    }
+                ]
             }
         ])
     }
@@ -260,6 +273,14 @@ class DiscordBot{
         return resp
     }
 
+    roll_random = async (query, interaction)=>{
+        let val = rollDice(query)
+
+        interaction.reply(`Dice Roll of: ${query}\nDice Value is: ${val.sum}`)
+
+        return JSON.stringify(val)
+    }
+
     play = async (query)=>{
         if(query.includes('https://')){
             if (query.includes('list=')){
@@ -392,6 +413,14 @@ class DiscordBot{
                     break
                 case 'stop':
                     this.stopPlayer(interaction)
+                    break
+                case 'roll':
+                    var roll_query = options.getString('query')
+                    try{
+                        await this.roll_random(roll_query, interaction)
+                    } catch (e) {
+                        logError(e,interaction.channel)
+                    }
                     break
                 default:
                     break
