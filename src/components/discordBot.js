@@ -231,6 +231,18 @@ class DiscordBot{
             }
         });
     }
+
+    getCurrentlyPlaying = async ()=>{
+        return this.curerntlyPlaying
+    }
+
+    getQueue = async ()=>{
+        let queue = this.songQueue.getQueue()
+
+        let resp = JSON.stringify(queue)
+
+        return resp
+    }
     
     run = async ()=>{
         this.client.once('ready',()=>{
@@ -340,6 +352,8 @@ class DiscordBot{
     
 }
 
-let bot = new DiscordBot()
+// let bot = new DiscordBot()
 
-bot.run()
+// bot.run()
+
+export {DiscordBot}
