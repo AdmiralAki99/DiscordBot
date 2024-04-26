@@ -1,5 +1,5 @@
 import e from "express";
-import {DiscordBot}  from "./discordBot.js"
+import {DiscordBot}  from "./src/components/discordBot.js"
 import bodyParser from "body-parser";
 
 const app = e();
