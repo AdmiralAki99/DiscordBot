@@ -3,10 +3,9 @@
 </script>
 
 <template>
-  <div>
-    <div id="splash-wrapper">
-     <div id="splash-text">LOADING</div>
-     <div id="splash-content"></div>
+  <div class="bg-white h-screen w-svw">
+    <div>
+
     </div>
   </div>
 </template>
