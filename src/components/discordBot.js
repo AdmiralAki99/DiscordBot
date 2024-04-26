@@ -330,77 +330,74 @@ class DiscordBot{
         
             const {commandName,options} = interaction
         
-            if(commandName === 'play'){
-                const query = options.getString('query')
-        
-                if(query.includes('https://')){
-                    if (query.includes('list=')){
-                        let songs = await this.playlistSearch(query,interaction)
-                        if( this.songQueue.size() === 0){
-                            interaction.reply(`Playing playlist`)
-                            songs.forEach(async (song)=>{
-                                await  this.addToQueue(song)
-                            })
-                            await  this.playSongFromQueue(interaction)
+            switch(commandName)
+            {
+                case 'play':
+                    const query = options.getString('query')
+            
+                    if(query.includes('https://')){
+                        if (query.includes('list=')){
+                            let songs = await this.playlistSearch(query,interaction)
+                            if( this.songQueue.size() === 0){
+                                interaction.reply(`Playing playlist`)
+                                songs.forEach(async (song)=>{
+                                    await  this.addToQueue(song)
+                                })
+                                await  this.playSongFromQueue(interaction)
+                            }else{
+                                songs.forEach(async (song)=>{
+                                    await  this.addToQueue(song)
+                                })
+                                interaction.reply(`Added playlist to queue`)
+                            }
                         }else{
-                            songs.forEach(async (song)=>{
+                            let song = await  this.linkSearch(query,interaction)
+                            if( this.songQueue.size() === 0){
+                                interaction.reply(`Playing ${song.title}`)
                                 await  this.addToQueue(song)
-                            })
-                            interaction.reply(`Added playlist to queue`)
+                                await  this.playSongFromQueue(interaction)
+                            }else{
+                                await  this.addToQueue(song)
+                                interaction.reply(`Added ${song.title} to queue`)
+                            }
                         }
+                        
                     }else{
-                        let song = await  this.linkSearch(query,interaction)
+                        let song = await  this.musicSearch(query,interaction)
+            
                         if( this.songQueue.size() === 0){
-                            interaction.reply(`Playing ${song.title}`)
+                            interaction.reply(`Playing ${song.title} by ${song.artist}`)
                             await  this.addToQueue(song)
                             await  this.playSongFromQueue(interaction)
                         }else{
                             await  this.addToQueue(song)
-                            interaction.reply(`Added ${song.title} to queue`)
+                            interaction.reply(`Added ${song.title} by ${song.artist} to queue`)
                         }
                     }
-                    
-                }else{
-                    let song = await  this.musicSearch(query,interaction)
-        
-                    if( this.songQueue.size() === 0){
-                        interaction.reply(`Playing ${song.title} by ${song.artist}`)
-                        await  this.addToQueue(song)
-                        await  this.playSongFromQueue(interaction)
-                    }else{
-                        await  this.addToQueue(song)
-                        interaction.reply(`Added ${song.title} by ${song.artist} to queue`)
-                    }
-                }
-               
-        
-               
+                    break
+                case 'yl':
+                    console.log("This does nothing")
+                    break;
+                case 'ctrls':
+                    this.displayMusicControlButtons(interaction)
+                    break
+                case 'pause':
+                    this.pausePlayback(interaction)
+                    break
+                case 'resume':
+                    this.resumePlayback(interaction)
+                    break
+                case 'skip':
+                    this.skipSong(interaction)
+                    break
+                case 'stop':
+                    this.stopPlayer(interaction)
+                    break
+                default:
+                    break
             }
-            if(commandName === 'yl'){
-                
             }
-        
-            if(commandName === 'ctrls'){
-                this.displayMusicControlButtons(interaction)
-            }
-        
-            if(commandName === 'pause'){
-                this.pausePlayback(interaction)
-            }
-        
-            if(commandName === 'resume'){
-                this.resumePlayback(interaction)
-            }
-        
-            if(commandName === 'skip'){
-                this.skipSong(interaction)
-            }
-
-            if(commandName === 'stop'){
-                this.stopPlayer(interaction)
-            }
-        })
-
+        )
         this.client.login(process.env.DISCORD_TOKEN)
         
     }
