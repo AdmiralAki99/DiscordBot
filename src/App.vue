@@ -1,7 +1,11 @@
-<script setup>
+<script>
   import './assets/splash.css'
   import QueueDisplay from './components/QueueDisplay.vue';
-  
+  export default {
+    components: {
+      QueueDisplay
+    }
+  }
 </script>
 
 <template>
