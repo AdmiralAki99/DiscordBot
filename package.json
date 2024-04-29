@@ -4,14 +4,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite ",
     "build": "vite build",
     "preview": "vite preview",
-    "bot-only": "node express_discord_bot\\main.js"
+    "server": "node express_discord_bot\\main.js",
+    "stack": "concurrently \"npm run server\" \"npm run dev\""
   },
   "dependencies": {
     "@discordjs/voice": "^0.16.1",
     "axios": "^1.6.8",
+    "concurrently": "^8.2.2",
     "discord.js": "^14.14.1",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
