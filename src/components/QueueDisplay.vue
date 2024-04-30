@@ -13,11 +13,24 @@ export default{
       }
       )
     },
-  },
+    pollData (func_to_call, interval) {
+        this.polling = setInterval(() => {
+          func_to_call()
+        }, interval)
+      }
+    },
   data(){
     return{
       queue
     }
+  },
+  created ()
+  {
+      this.pollData(this.getQueue, 1000);
+  },
+  beforeDestroy()
+  {
+    clearInterval(this.polling)
   }
 }
 
