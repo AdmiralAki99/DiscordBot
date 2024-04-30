@@ -1,5 +1,5 @@
 <script>
-import { ref } from 'vue';
+import { getCurrentInstance, ref } from 'vue';
 import axios from 'axios';
 let queue = ref([])
 
@@ -9,9 +9,14 @@ export default{
      await fetch('http://localhost:3000/queue').then((response) => {
         return response.json();
       }).then((data) => {
-        queue = data;
+        queue.value = data;
       }
       )
+    },
+  },
+  data(){
+    return{
+      queue
     }
   }
 }
