@@ -22,6 +22,8 @@ class DiscordBot{
             GatewayIntentBits.GuildMessages,
             GatewayIntentBits.MessageContent
         ]})
+        this.bot_admins = ["119005036150784005", "558358512858824704"]
+        this.non_voice_commands = ["kill-server", "roll"]
     }
 
     deployCommands = async (message)=>{
@@ -69,6 +71,10 @@ class DiscordBot{
                         required:true
                     }
                 ]
+            },
+            {
+                name:'kill-server',
+                description:"Owner only command to kill server",
             }
         ])
     }
@@ -339,17 +345,17 @@ class DiscordBot{
         });
 
         this.client.on('interactionCreate', async (interaction)=>{
+            const {commandName,options} = interaction
+
             if(!interaction.isCommand()) return
         
             if(!interaction.guildId) return
         
             if (!(interaction.member instanceof GuildMember)) return
         
-            if (!interaction.member.voice.channel) {
+            if (!interaction.member.voice.channel && !this.non_voice_commands.includes(commandName)) {
                 return interaction.reply('You need to be in a voice channel')
             }
-        
-            const {commandName,options} = interaction
         
             switch(commandName)
             {
@@ -413,6 +419,17 @@ class DiscordBot{
                     break
                 case 'stop':
                     this.stopPlayer(interaction)
+                    break
+                case 'kill-server':
+                    if(this.bot_admins.includes(interaction.user.id))
+                    {
+                        await interaction.reply(`Killing server! Goodbye ${interaction.user.username} :)`)
+                        process.exit(0);
+                        break; // Should never make it here
+                    }
+                    interaction.reply('No')
+                    let user = this.client.users.cache.get(interaction.user.id)
+                    user.send("Naughty Naughty, Only Owners can run this command!")
                     break
                 case 'roll':
                     var roll_query = options.getString('query')
