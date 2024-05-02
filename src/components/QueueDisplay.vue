@@ -42,10 +42,14 @@ export default{
         <h2>Queue</h2>
         <ul>
           <li v-for="song in queue" :key="song.id">
-            {{song.title}}
+            <div class="flex items-center">
+              <div class="pr-10">
+                <img :src="song.thumbnail" alt="album art" class="h-20 w-20 rounded-full flex-shrink-0 min-w-20 min-h-20" />
+              </div>
+              {{song.title}}
+            </div>
           </li>
         </ul>
-        <button @click="getQueue">Get Queue</button>
     </div>
   </div>
 </template>
