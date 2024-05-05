@@ -28,6 +28,15 @@ class DiscordBot{
         this.repeat_playlist = 0 // Property for telling to to repeat_playlist
     }
 
+    getStatus = async ()=>{
+        return {
+            "currently_playing": JSON.stringify(this.curerntlyPlaying),
+            "queue": JSON.stringify(this.songQueue.getQueue()),
+            "repeat_song": JSON.stringify((this.repeat_song == 1)? true:false),
+            "repeat_playlist": JSON.stringify((this.repeat_playlist == 1)? true:false),
+        }
+    }
+
     deployCommands = async (message)=>{
         await message.guild.commands.set([
             {

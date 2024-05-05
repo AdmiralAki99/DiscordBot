@@ -35,6 +35,10 @@ app.post('/play', async (req,res)=>{
     bot.play(title, fake_interaction)
 })
 
+app.get('/status',async (req,res)=>{
+    res.send(await bot.getStatus())
+})
+
 app.listen(3000, ()=>{
     console.log('Listening on port 3000');
     bot.run()
