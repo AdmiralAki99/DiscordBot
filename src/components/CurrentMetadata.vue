@@ -45,7 +45,6 @@ export default{
     },
     created(){
         this.pollData(this.getStatus, 1000);
-        addIcons({BiShuffle})
     },
     beforeDestroy(){
         clearInterval(this.polling)
