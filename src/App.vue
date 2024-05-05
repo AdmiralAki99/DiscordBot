@@ -1,9 +1,11 @@
 <script>
   import './assets/splash.css'
   import QueueDisplay from './components/QueueDisplay.vue';
+  import CurrentMetadata from './components/CurrentMetadata.vue';
   export default {
     components: {
-      QueueDisplay
+      QueueDisplay,
+      CurrentMetadata
     }
   }
 </script>
@@ -15,7 +17,7 @@
       <div class="grid grid-cols-3 gap-4 h-svh">
         <div class="bg-gray-600">Number Of Users Active</div>
         <div>Element 2</div>
-        <div>Top Song</div>
+        <div><CurrentMetadata/></div>
         <div class="row-start-2 row-end-4"><QueueDisplay/></div>
         <div class="row-span-3">User Request Info</div>
       </div>
