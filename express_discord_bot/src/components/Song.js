@@ -12,6 +12,18 @@ class Song{
     getMetadata(){
         return `${this.title} by ${this.artist} requested by ${this.requester}`;
     }
+
+    getTitle(){
+        return this.title;
+    }
+
+    getRequestedBy(){
+        return this.requester;
+    }
+
+    getThumbnail(){
+        return this.thumbnail;
+    }
 }
 
 export {Song};
