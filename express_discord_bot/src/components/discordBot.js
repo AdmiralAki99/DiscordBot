@@ -15,7 +15,7 @@ class DiscordBot{
         this.songQueue = new Queue()
         this.musicPlayer = createAudioPlayer()
         this.recentlyPlayed = null
-        this.curerntlyPlaying = false
+        this.currentlyPlaying = false
         this.client = new Client({intents:[
             GatewayIntentBits.Guilds,
             GatewayIntentBits.GuildVoiceStates,
@@ -29,12 +29,24 @@ class DiscordBot{
     }
 
     getStatus = async ()=>{
-        return {
-            "currently_playing": JSON.stringify(this.curerntlyPlaying),
-            "queue": JSON.stringify(this.songQueue.getQueue()),
-            "repeat_song": JSON.stringify((this.repeat_song == 1)? true:false),
-            "repeat_playlist": JSON.stringify((this.repeat_playlist == 1)? true:false),
+        if(this.currentlyPlaying){
+            return {
+                "currently_playing": this.songQueue.peek().getTitle(),
+                "requester": this.songQueue.peek().getRequestedBy(),
+                "queue": JSON.stringify(this.songQueue.getQueue()),
+                "repeat_song": JSON.stringify((this.repeat_song == 1)? true:false),
+                "repeat_playlist": JSON.stringify((this.repeat_playlist == 1)? true:false),
+            }
+        }else{
+            return {
+                "currently_playing": "Nothing",
+                "requester": "Nobody",
+                "queue": [],
+                "repeat_song": JSON.stringify((this.repeat_song == 1)? true:false),
+                "repeat_playlist": JSON.stringify((this.repeat_playlist == 1)? true:false),
+            }
         }
+
     }
 
     deployCommands = async (message)=>{
@@ -223,10 +235,10 @@ class DiscordBot{
     playSongFromQueue = async (interaction)=>{
         if(this.songQueue.isEmpty()) return
     
-        this.curerntlyPlaying = true
+        this.currentlyPlaying = true
         
         await  this.cycleQueue(interaction).then(()=>{
-            this.curerntlyPlaying = false
+            this.currentlyPlaying = false
         })
        
     }
@@ -300,7 +312,7 @@ class DiscordBot{
     }
 
     getCurrentlyPlaying = async ()=>{
-        return JSON.stringify(this.curerntlyPlaying)
+        return JSON.stringify(this.currentlyPlaying)
     }
 
     getQueue = async ()=>{
