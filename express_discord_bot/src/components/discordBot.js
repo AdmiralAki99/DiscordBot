@@ -24,6 +24,8 @@ class DiscordBot{
         ]})
         this.bot_admins = ["119005036150784005", "558358512858824704"]
         this.non_voice_commands = ["kill-server", "roll"]
+        this.repeat_song = 0 // Property for telling it to repeat song
+        this.repeat_playlist = 0 // Property for telling to to repeat_playlist
     }
 
     deployCommands = async (message)=>{
@@ -39,6 +41,14 @@ class DiscordBot{
                         required:true
                     }
                 ]
+            },
+            {
+                name:'repeat_song',
+                description: 'Replay song at the top of the queue forever'
+            },
+            {
+                name:'repeat_playlist',
+                description: 'Cycle through current queue forever'
             },
             {
                 name:'ctrls',
@@ -95,7 +105,23 @@ class DiscordBot{
 
     skipSong = async (interaction)=>{
         this.musicPlayer.stop()
+        this.songQueue.dequeue()
         interaction.reply(`Song skipped by ${interaction.user.username}`)
+    }
+
+    removeSongFromQueue = async () => {
+        if (this.repeat_song){
+            return
+        }
+        else if (this.repeat_playlist)
+        {
+            this.songQueue.enqueue(this.songQueue.dequeue())
+        }
+        else
+        {
+            this.songQueue.dequeue()
+        }
+        return
     }
 
     stopPlayer = async (interaction)=>{
@@ -178,12 +204,9 @@ class DiscordBot{
                     reject(error);
                 });
             });
-        
-            // await musicPlayer.play(resource)
-        
             voiceConnection.subscribe( this.musicPlayer)
             await playPromise;
-            this.songQueue.dequeue()
+            this.removeSongFromQueue()
             this.recentlyPlayed = song
         }
     }
@@ -287,7 +310,7 @@ class DiscordBot{
         return JSON.stringify(val)
     }
 
-    play = async (query)=>{
+    play = async (query, interaction)=>{
         if(query.includes('https://')){
             if (query.includes('list=')){
                 let songs = await this.playlistSearch(query,interaction)
@@ -304,7 +327,7 @@ class DiscordBot{
                     interaction.reply(`Added playlist to queue`)
                 }
             }else{
-                let song = await  this.adminLinkSearch(query)
+                let song = await  this.linkSearch(query,interaction)
                 if( this.songQueue.size() === 0){
                     interaction.reply(`Playing ${song.title}`)
                     await  this.addToQueue(song)
@@ -315,15 +338,17 @@ class DiscordBot{
                 }
             }
         }else{
-            let songData = await this.adminMusicSearch(query)
+            let song = await  this.musicSearch(query,interaction)
+
             if( this.songQueue.size() === 0){
-                await this.addToQueue(songData)
-                await this.playSongFromQueue()
+                interaction.reply(`Playing ${song.title} by ${song.artist}`)
+                await  this.addToQueue(song)
+                await  this.playSongFromQueue(interaction)
             }else{
-                await this.addToQueue(songData)
+                await  this.addToQueue(song)
+                interaction.reply(`Added ${song.title} by ${song.artist} to queue`)
             }
         }
-        
     }
     
     run = async ()=>{
@@ -361,47 +386,17 @@ class DiscordBot{
             {
                 case 'play':
                     const query = options.getString('query')
-            
-                    if(query.includes('https://')){
-                        if (query.includes('list=')){
-                            let songs = await this.playlistSearch(query,interaction)
-                            if( this.songQueue.size() === 0){
-                                interaction.reply(`Playing playlist`)
-                                songs.forEach(async (song)=>{
-                                    await  this.addToQueue(song)
-                                })
-                                await  this.playSongFromQueue(interaction)
-                            }else{
-                                songs.forEach(async (song)=>{
-                                    await  this.addToQueue(song)
-                                })
-                                interaction.reply(`Added playlist to queue`)
-                            }
-                        }else{
-                            let song = await  this.linkSearch(query,interaction)
-                            if( this.songQueue.size() === 0){
-                                interaction.reply(`Playing ${song.title}`)
-                                await  this.addToQueue(song)
-                                await  this.playSongFromQueue(interaction)
-                            }else{
-                                await  this.addToQueue(song)
-                                interaction.reply(`Added ${song.title} to queue`)
-                            }
-                        }
-                        
-                    }else{
-                        let song = await  this.musicSearch(query,interaction)
-            
-                        if( this.songQueue.size() === 0){
-                            interaction.reply(`Playing ${song.title} by ${song.artist}`)
-                            await  this.addToQueue(song)
-                            await  this.playSongFromQueue(interaction)
-                        }else{
-                            await  this.addToQueue(song)
-                            interaction.reply(`Added ${song.title} by ${song.artist} to queue`)
-                        }
-                    }
+                    await this.play(query, interaction);
                     break
+                case 'repeat_song':
+                    // Stateful command - this is not exactly a good way to do this I think
+                    this.repeat_song = (this.repeat_song + 1) & 1 // My favorite toggle trick
+                    interaction.reply(`Repeat set to ${this.repeat_song}`)
+                    break
+                case 'repeat_playlist':
+                    this.repeat_playlist = (this.repeat_playlist + 1) & 1
+                    interaction.reply(`Repeat Playlist set to ${this.repeat_playlist}`)
+                    break;
                 case 'yl':
                     console.log("This does nothing")
                     break;

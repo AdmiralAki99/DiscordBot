@@ -31,7 +31,8 @@ app.get('/currently-playing', async (req,res)=>{
 
 app.post('/play', async (req,res)=>{
     let title = req.body.title
-    bot.play(title)
+    fake_interaction = null
+    bot.play(title, fake_interaction)
 })
 
 app.listen(3000, ()=>{
