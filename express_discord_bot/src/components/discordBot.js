@@ -1,4 +1,4 @@
-import { Client,GatewayIntentBits,GuildMember,ActionRowBuilder, ButtonBuilder, ButtonStyle, SlashCommandBuilder } from 'discord.js'
+import { Client,GatewayIntentBits,GuildMember,ActionRowBuilder, ButtonBuilder, ButtonStyle, SlashCommandBuilder, User } from 'discord.js'
 import {joinVoiceChannel,getVoiceConnection,createAudioPlayer,createAudioResource} from '@discordjs/voice'
 import { configDotenv, parse } from 'dotenv'
 import play from 'play-dl';
@@ -29,6 +29,7 @@ class DiscordBot{
         this.guildId = null
         this.activeVoiceChannel = null
         this.playbackStatus = "Stopped"
+        this.requestsFromUser = {}
     }
 
     getStatus = async ()=>{
@@ -53,6 +54,13 @@ class DiscordBot{
         }
 
     }
+    
+    getRequestLogs = async ()=>{
+        return JSON.stringify({
+            "labels":Object.keys(this.requestsFromUser),
+            "datasets":Object.values(this.requestsFromUser)
+        })
+    }
 
     getActiveUsersOnVoiceChannel = async () =>{
 
@@ -74,74 +82,78 @@ class DiscordBot{
     }
 
     adminDeafenUser = async (userId)=>{
+        let result = false
         this.client.guilds.cache.get(this.guildId).channels.cache.forEach((channel)=>{
             if(channel.type == 2){
                 channel.members.forEach((member)=>{
                     if(member.id == userId){
                         member.voice.setDeaf(true)
-                        return true
+                        result = true
                     }
                 })
             }
         })
-
-        return false
+        return result
     }
 
     adminUndeafenUser = async (userId)=>{
+        let result = false
         this.client.guilds.cache.get(this.guildId).channels.cache.forEach((channel)=>{
             if(channel.type == 2){
                 channel.members.forEach((member)=>{
                     if(member.id == userId){
                         member.voice.setDeaf(false)
-                        return true
+                        result = true
                     }
                 })
             }
         })
-        return false
+        return result
     }
 
     adminMuteUser = async (userId)=>{
+        let result = false
         this.client.guilds.cache.get(this.guildId).channels.cache.forEach((channel)=>{
             if(channel.type == 2){
                 channel.members.forEach((member)=>{
                     if(member.id == userId){
                         member.voice.setMute(true)
-                        return true
+                        result = true
                     }
                 })
             }
         })
-        return false
+        return result
     }
 
     adminUnmuteUser = async (userId)=>{
+        let result = false
         this.client.guilds.cache.get(this.guildId).channels.cache.forEach((channel)=>{
             if(channel.type == 2){
                 channel.members.forEach((member)=>{
                     if(member.id == userId){
                         member.voice.setMute(false)
-                        return true
+                        result = true
                     }
                 })
             }
         })
-        return false
+        return result
     }
 
     adminKickUser = async (userId)=>{
+        let result = false
         this.client.guilds.cache.get(this.guildId).channels.cache.forEach((channel)=>{
             if(channel.type == 2){
                 channel.members.forEach((member)=>{
                     if(member.id == userId){
                         member.voice.disconnect()
-                        return true
+                        result = true
                     }
                 })
             }
         })
-        return false
+        return result
     }
 
     deployCommands = async (message)=>{
@@ -203,6 +215,14 @@ class DiscordBot{
                 description:"Owner only command to kill server",
             }
         ])
+    }
+
+    logUserRequest = async (interaction)=>{
+        if(this.requestsFromUser[interaction.user.username]){
+            this.requestsFromUser[interaction.user.username] += 1
+        }else{
+            this.requestsFromUser[interaction.user.username] = 1
+        }
     }
 
     parseMessage = async (message)=>{
@@ -541,6 +561,8 @@ class DiscordBot{
             }
 
             this.guildId = interaction.guildId
+
+            this.logUserRequest(interaction)
         
             switch(commandName)
             {
