@@ -58,7 +58,7 @@ app.get('/stop', async (req,res)=>{
 app.post('/deafen', async (req,res)=>{
     let userId = req.body.userId
     let result = await bot.adminDeafenUser(userId)
-
+    
     if (result){
         res.send('User deafened')
     }else{
@@ -108,6 +108,10 @@ app.post('/unmute', async (req,res)=>{
     }else{
         res.send('User not unmuted')
     }
+})
+
+app.get('/logs/get/records',async (req,res)=>{
+    res.send(await bot.getRequestLogs())
 })
 
 app.get('/currently-playing', async (req,res)=>{
