@@ -53,7 +53,7 @@ export default{
 
 </script>
 
-<template>
+<!-- <template>
     <div>
         <h2 class="text-2xl pb-5 text-white">Current Media</h2>
         <div class="flex">
@@ -74,4 +74,37 @@ export default{
                 <div>Repeat</div>
             </div>
     </div>
+</template> -->
+
+<template>
+    <VaCard
+        color="backgroundSecondary"
+        stripe
+        stripe-color="info"
+    >
+        <VaCardTitle class="text-white text-5xl">Music Playback</VaCardTitle>
+        <VaCardContent>
+            <div class="flex pt-2 pb-5">
+                <div class="grid grid-cols-1 gap-4">
+                    <div class="text-white">
+                        {{currentSong}}
+                    </div>
+                    <div class="text-gray-400">
+                        Requested by: {{requester}}
+                    </div>
+                </div>
+            </div>
+
+            <div class="">
+                <VaButtonGroup round>
+                    <VaButton><VaIcon name="shuffle"></VaIcon></VaButton>
+                    <VaButton><VaIcon name="skip_previous"></VaIcon></VaButton>
+                    <VaButton><VaIcon name="play_arrow"></VaIcon></VaButton>
+                    <VaButton><VaIcon name="skip_next"></VaIcon></VaButton>
+                    <VaButton><VaIcon name="repeat"></VaIcon></VaButton>
+                </VaButtonGroup>
+            </div>
+            
+        </VaCardContent>
+    </VaCard>
 </template>

@@ -35,8 +35,8 @@ export default{
 }
 
 </script>
-
-<template>
+<!-- Original template -->
+<!-- <template>
   <div class="bg-gray-600">
     <div>
         <h2>Queue</h2>
@@ -52,4 +52,31 @@ export default{
         </ul>
     </div>
   </div>
+</template> -->
+
+<template>
+  <VaCard
+    color="backgroundSecondary"
+  >
+    <VaCardTitle class="text-white text-5xl">Music Queue</VaCardTitle>
+    <VaCardContent>
+      <VaList>
+        <VaListItem
+          v-for="song in queue"
+          :key="song.id" class="pb-5">
+          <VaListItemAvatar>
+            <VaAvatar class="pr-2">
+              <img :src="song.thumbnail" alt="album art" />
+            </VaAvatar>
+          </VaListItemAvatar>
+          <VaListItemText class="pr-2">
+            <VaListItemTitle>{{ song.title }}</VaListItemTitle>
+          </VaListItemText>
+          <VaButton icon>
+            <VaIcon name="delete"></VaIcon>
+          </VaButton>
+        </VaListItem>
+      </VaList>
+    </VaCardContent>
+  </VaCard>
 </template>
