@@ -26,6 +26,8 @@ class DiscordBot{
         this.non_voice_commands = ["kill-server", "roll"]
         this.repeat_song = 0 // Property for telling it to repeat song
         this.repeat_playlist = 0 // Property for telling to to repeat_playlist
+        this.guildId = null
+        this.activeVoiceChannel = null
     }
 
     getStatus = async ()=>{
@@ -47,6 +49,23 @@ class DiscordBot{
             }
         }
 
+    }
+
+    getActiveUsersOnVoiceChannel = async () =>{
+
+        let activeUsers = []
+
+        this.client.guilds.cache.get(this.guildId).channels.cache.forEach((channel)=>{
+            if(channel.type == 2){
+                channel.members.forEach((member)=>{
+                    if(member.id != this.client.user.id){
+                        activeUsers.push({username:member.user.username,id:member.user.id,channel:channel.name,avatar:member.user.avatarURL({dynamic:true}),accentColour:member.displayColor})
+                    }
+                })
+            }
+        })
+
+        return activeUsers
     }
 
     deployCommands = async (message)=>{
@@ -158,6 +177,20 @@ class DiscordBot{
     
         return song
     }
+
+    adminQueueSong = async (query)=>{
+        let song = await this.adminMusicSearch(query)
+
+        if( this.songQueue.size() === 0){
+            // await  this.addToQueue(song)
+
+        }else{
+            await  this.addToQueue(song)
+            return true
+        }
+    }
+    
+
     
     musicSearch = async (query,interaction)=>{
         const metadata = await play.search(query, { limit: 1 })
@@ -211,6 +244,8 @@ class DiscordBot{
                 guildId:interaction.guildId,
                 adapterCreator:interaction.guild.voiceAdapterCreator
             })
+
+            this.activeVoiceChannel = interaction.member.voice.channel.id
         
             let resource = createAudioResource(stream.stream, {
                 inputType: stream.type
@@ -402,6 +437,8 @@ class DiscordBot{
             if (!interaction.member.voice.channel && !this.non_voice_commands.includes(commandName)) {
                 return interaction.reply('You need to be in a voice channel')
             }
+
+            this.guildId = interaction.guildId
         
             switch(commandName)
             {

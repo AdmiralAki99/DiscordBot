@@ -29,14 +29,21 @@ app.get('/currently-playing', async (req,res)=>{
     res.send(await bot.getCurrentlyPlaying())
 })
 
-app.post('/play', async (req,res)=>{
+app.post('/youtube/search', async (req,res)=>{
     let title = req.body.title
-    fake_interaction = null
-    bot.play(title, fake_interaction)
+    let result = await bot.adminQueueSong(title)
+    
+    if (result){
+        res.send('Song added to queue')
+    }
 })
 
 app.get('/status',async (req,res)=>{
     res.send(await bot.getStatus())
+})
+
+app.get('/users',async(req,res)=>{
+    res.send(await bot.getActiveUsersOnVoiceChannel())
 })
 
 app.listen(3000, ()=>{
