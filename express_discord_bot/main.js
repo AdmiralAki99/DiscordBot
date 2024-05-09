@@ -25,6 +25,91 @@ app.get('/queue', async (req,res)=>{
     res.send(queue)
 })
 
+app.get('/pause', async (req,res)=>{
+    let result = await bot.adminPausePlayback()
+
+    if (result){
+        res.send('Playback paused')
+    }else{
+        res.send('Playback not paused')
+    }
+})
+
+app.get('/resume', async (req,res)=>{
+    let result = await bot.adminResumePlayback()
+
+    if (result){
+        res.send('Playback resumed')
+    }else{
+        res.send('Playback not resumed')
+    }
+})
+
+app.get('/stop', async (req,res)=>{
+    let result = await bot.adminStopPlayback()
+
+    if (result){
+        res.send('Playback stopped')
+    }else{
+        res.send('Playback not stopped')
+    }
+})
+
+app.post('/deafen', async (req,res)=>{
+    let userId = req.body.userId
+    let result = await bot.adminDeafenUser(userId)
+
+    if (result){
+        res.send('User deafened')
+    }else{
+        res.send('User not deafened')
+    }
+})
+
+app.post('/undeafen', async (req,res)=>{
+    let userId = req.body.userId
+    let result = await bot.adminUndeafenUser(userId)
+
+    if (result){
+        res.send('User undeafened')
+    }else{
+        res.send('User not undeafened')
+    }
+})
+
+app.post('/kick', async (req,res)=>{
+    let userId = req.body.userId
+    let result = await bot.adminKickUser(userId)
+
+    if (result){
+        res.send('User kicked')
+    }else{
+        res.send('User not kicked')
+    }
+})
+
+app.post('/mute', async (req,res)=>{
+    let userId = req.body.userId
+    let result = await bot.adminMuteUser(userId)
+
+    if (result){
+        res.send('User muted')
+    }else{
+        res.send('User not muted')
+    }
+})
+
+app.post('/unmute', async (req,res)=>{
+    let userId = req.body.userId
+    let result = await bot.adminUnmuteUser(userId)
+
+    if (result){
+        res.send('User unmuted')
+    }else{
+        res.send('User not unmuted')
+    }
+})
+
 app.get('/currently-playing', async (req,res)=>{
     res.send(await bot.getCurrentlyPlaying())
 })
@@ -35,6 +120,8 @@ app.post('/youtube/search', async (req,res)=>{
     
     if (result){
         res.send('Song added to queue')
+    }else{
+        res.send('Song not found')
     }
 })
 

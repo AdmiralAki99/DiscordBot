@@ -28,6 +28,7 @@ class DiscordBot{
         this.repeat_playlist = 0 // Property for telling to to repeat_playlist
         this.guildId = null
         this.activeVoiceChannel = null
+        this.playbackStatus = "Stopped"
     }
 
     getStatus = async ()=>{
@@ -38,6 +39,7 @@ class DiscordBot{
                 "queue": JSON.stringify(this.songQueue.getQueue()),
                 "repeat_song": JSON.stringify((this.repeat_song == 1)? true:false),
                 "repeat_playlist": JSON.stringify((this.repeat_playlist == 1)? true:false),
+                "playback_status": this.playbackStatus
             }
         }else{
             return {
@@ -46,6 +48,7 @@ class DiscordBot{
                 "queue": [],
                 "repeat_song": JSON.stringify((this.repeat_song == 1)? true:false),
                 "repeat_playlist": JSON.stringify((this.repeat_playlist == 1)? true:false),
+                "playback_status": this.playbackStatus
             }
         }
 
@@ -54,6 +57,8 @@ class DiscordBot{
     getActiveUsersOnVoiceChannel = async () =>{
 
         let activeUsers = []
+
+        if(this.activeVoiceChannel == null) return activeUsers
 
         this.client.guilds.cache.get(this.guildId).channels.cache.forEach((channel)=>{
             if(channel.type == 2){
@@ -66,6 +71,77 @@ class DiscordBot{
         })
 
         return activeUsers
+    }
+
+    adminDeafenUser = async (userId)=>{
+        this.client.guilds.cache.get(this.guildId).channels.cache.forEach((channel)=>{
+            if(channel.type == 2){
+                channel.members.forEach((member)=>{
+                    if(member.id == userId){
+                        member.voice.setDeaf(true)
+                        return true
+                    }
+                })
+            }
+        })
+
+        return false
+    }
+
+    adminUndeafenUser = async (userId)=>{
+        this.client.guilds.cache.get(this.guildId).channels.cache.forEach((channel)=>{
+            if(channel.type == 2){
+                channel.members.forEach((member)=>{
+                    if(member.id == userId){
+                        member.voice.setDeaf(false)
+                        return true
+                    }
+                })
+            }
+        })
+        return false
+    }
+
+    adminMuteUser = async (userId)=>{
+        this.client.guilds.cache.get(this.guildId).channels.cache.forEach((channel)=>{
+            if(channel.type == 2){
+                channel.members.forEach((member)=>{
+                    if(member.id == userId){
+                        member.voice.setMute(true)
+                        return true
+                    }
+                })
+            }
+        })
+        return false
+    }
+
+    adminUnmuteUser = async (userId)=>{
+        this.client.guilds.cache.get(this.guildId).channels.cache.forEach((channel)=>{
+            if(channel.type == 2){
+                channel.members.forEach((member)=>{
+                    if(member.id == userId){
+                        member.voice.setMute(false)
+                        return true
+                    }
+                })
+            }
+        })
+        return false
+    }
+
+    adminKickUser = async (userId)=>{
+        this.client.guilds.cache.get(this.guildId).channels.cache.forEach((channel)=>{
+            if(channel.type == 2){
+                channel.members.forEach((member)=>{
+                    if(member.id == userId){
+                        member.voice.disconnect()
+                        return true
+                    }
+                })
+            }
+        })
+        return false
     }
 
     deployCommands = async (message)=>{
@@ -135,11 +211,25 @@ class DiscordBot{
 
     pausePlayback = async (interaction)=>{
         this.musicPlayer.pause()
+        this.playbackStatus = "Paused"
         interaction.reply(`Playback paused by ${interaction.user.username}`)
+    }
+
+    adminPausePlayback = async ()=>{
+        this.musicPlayer.pause()
+        this.playbackStatus = "Paused"
+        return true
+    }
+
+    adminResumePlayback = async ()=>{
+        this.musicPlayer.unpause()
+        this.playbackStatus = "Playing"
+        return true
     }
 
     resumePlayback = async (interaction)=>{
         this.musicPlayer.unpause()
+        this.playbackStatus = "Playing"
         interaction.reply(`Playback resumed by ${interaction.user.username}`)
     }
 
@@ -166,8 +256,16 @@ class DiscordBot{
 
     stopPlayer = async (interaction)=>{
         this.musicPlayer.stop()
+        this.playbackStatus = "Stopped"
         interaction.reply(`Playback stopped by ${interaction.user.username}`)
         this.songQueue.clearQueue()
+    }
+
+    adminStopPlayback = async ()=>{
+        this.musicPlayer.stop()
+        this.playbackStatus = "Stopped"
+        this.songQueue.clearQueue()
+        return true
     }
 
     adminMusicSearch = async (query)=>{
@@ -271,10 +369,14 @@ class DiscordBot{
         if(this.songQueue.isEmpty()) return
     
         this.currentlyPlaying = true
+
+        this.playbackStatus = "Playing"
         
         await  this.cycleQueue(interaction).then(()=>{
             this.currentlyPlaying = false
         })
+
+        this.playbackStatus = "Stopped"
        
     }
 
