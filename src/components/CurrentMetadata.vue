@@ -6,6 +6,7 @@ let repeatSong = ref(false)
 let requester = ref("")
 let shuffle = ref(false)
 let repeatPlaylist = ref(false)
+let playbackStatus = ref("")
 
 export default{
     methods:{
@@ -18,11 +19,13 @@ export default{
                     requester.value = ""
                     repeatSong.value = data.repeat_song;
                     repeatPlaylist.value = data.repeat_playlist;
+                    playbackStatus.value = data.playback_status;
                 }else{
                     currentSong.value = data.currently_playing;
                     requester.value = data.requester;
                     repeatSong.value = data.repeat_song;
                     repeatPlaylist.value = data.repeat_playlist;
+                    playbackStatus.value = data.playback_status;
                 }
 
             })
@@ -31,6 +34,20 @@ export default{
             this.polling = setInterval(() => {
                 func_to_call()
             }, interval)
+        },
+        async resumeSong(){
+            await fetch('http://localhost:3000/resume').then((response) => {
+                return response.json();
+            }).then((data) => {
+                console.log(data)
+            })
+        },
+        async pauseSong(){
+            await fetch('http://localhost:3000/pause').then((response) => {
+                return response.json();
+            }).then((data) => {
+                console.log(data)
+            })
         }
     },
 
@@ -99,7 +116,7 @@ export default{
                 <VaButtonGroup round>
                     <VaButton><VaIcon name="shuffle"></VaIcon></VaButton>
                     <VaButton><VaIcon name="skip_previous"></VaIcon></VaButton>
-                    <VaButton><VaIcon name="play_arrow"></VaIcon></VaButton>
+                    <VaButton @click="resumeSong"><VaIcon :name="(playbackStatus == 'Stopped') ? 'pause' : 'play_arrow'"></VaIcon></VaButton>
                     <VaButton><VaIcon name="skip_next"></VaIcon></VaButton>
                     <VaButton><VaIcon name="repeat"></VaIcon></VaButton>
                 </VaButtonGroup>
