@@ -5,6 +5,7 @@ import play from 'play-dl';
 import 'yt-search'
 import yts from 'yt-search'
 import {Queue} from './queue.js'
+import {DiscordUser} from './discordUser.js'
 import { Song } from './Song.js'
 import {rollDice} from './diceparser.js'
 
@@ -14,6 +15,7 @@ class DiscordBot{
     constructor(){
         this.songQueue = new Queue()
         this.musicPlayer = createAudioPlayer()
+        this.musicPlayer.setMaxListeners(20)
         this.recentlyPlayed = null
         this.currentlyPlaying = false
         this.client = new Client({intents:[
@@ -28,7 +30,7 @@ class DiscordBot{
         this.repeat_playlist = 0 // Property for telling to to repeat_playlist
         this.guildId = null
         this.activeVoiceChannel = null
-        this.playbackStatus = "Stopped"
+        this.playbackStatus = "Paused"
         this.requestsFromUser = {}
     }
 
@@ -54,11 +56,27 @@ class DiscordBot{
         }
 
     }
+
+    getUserStatuses = async ()=>{
+        if(this.activeVoiceChannel == null) return JSON.stringify([])
+
+        let users = []
+
+        this.client.guilds.cache.get(this.guildId).channels.cache.forEach((channel)=>{
+            if(channel.type == 2){
+                channel.members.forEach((member)=>{
+                    users.push(new DiscordUser(member.user.id,member.user.username,false,member.voice.serverMute,member.voice.serverDeaf))
+                })
+            }
+        })
+
+        
+    }
     
     getRequestLogs = async ()=>{
         return JSON.stringify({
             "labels":Object.keys(this.requestsFromUser),
-            "datasets":Object.values(this.requestsFromUser)
+            "frequency":Object.values(this.requestsFromUser)
         })
     }
 
@@ -247,6 +265,12 @@ class DiscordBot{
         return true
     }
 
+    adminSkipPlayback = async ()=>{
+        this.musicPlayer.stop()
+        this.musicPlayer.unpause()
+        return true
+    }
+
     resumePlayback = async (interaction)=>{
         this.musicPlayer.unpause()
         this.playbackStatus = "Playing"
@@ -254,9 +278,9 @@ class DiscordBot{
     }
 
     skipSong = async (interaction)=>{
-        this.musicPlayer.stop()
-        this.songQueue.dequeue()
-        interaction.reply(`Song skipped by ${interaction.user.username}`)
+       this.musicPlayer.stop()
+       this.musicPlayer.unpause()
+       interaction.reply(`Song skipped by ${interaction.user.username}`)
     }
 
     removeSongFromQueue = async () => {
@@ -276,14 +300,14 @@ class DiscordBot{
 
     stopPlayer = async (interaction)=>{
         this.musicPlayer.stop()
-        this.playbackStatus = "Stopped"
+        this.playbackStatus = "Paused"
         interaction.reply(`Playback stopped by ${interaction.user.username}`)
         this.songQueue.clearQueue()
     }
 
     adminStopPlayback = async ()=>{
         this.musicPlayer.stop()
-        this.playbackStatus = "Stopped"
+        this.playbackStatus = "Paused"
         this.songQueue.clearQueue()
         return true
     }
@@ -396,7 +420,7 @@ class DiscordBot{
             this.currentlyPlaying = false
         })
 
-        this.playbackStatus = "Stopped"
+        this.playbackStatus = "Paused"
        
     }
 
