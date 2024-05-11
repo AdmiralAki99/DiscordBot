@@ -55,6 +55,18 @@ app.get('/stop', async (req,res)=>{
     }
 })
 
+app.get('/skip', async (req,res)=>{
+    let result = await bot.adminSkipPlayback()
+
+    if (result){
+        res.send('Song skipped')
+    }
+    else{
+        res.send('Song not skipped')
+    }
+
+})
+
 app.post('/deafen', async (req,res)=>{
     let userId = req.body.userId
     let result = await bot.adminDeafenUser(userId)
@@ -131,6 +143,14 @@ app.post('/youtube/search', async (req,res)=>{
 
 app.get('/status',async (req,res)=>{
     res.send(await bot.getStatus())
+})
+
+app.post('/mute', async (req,res)=>{
+
+})
+
+app.get('/voiceStatus',async(req,res)=>{
+    res.send(await bot.getUserStatuses())
 })
 
 app.get('/users',async(req,res)=>{
