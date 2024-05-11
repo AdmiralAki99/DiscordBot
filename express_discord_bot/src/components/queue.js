@@ -6,6 +6,14 @@ class Queue {
     enqueue(element) {
       this.items.push(element);
     }
+
+    insertAtIndex(element, index){
+        this.items.splice(index, 0, element)
+    }
+
+    removeAtIndex(index){
+        this.items.splice(index, 1)
+    }
   
     dequeue() {
       if (this.isEmpty()) {

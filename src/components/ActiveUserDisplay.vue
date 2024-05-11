@@ -3,7 +3,6 @@ import { getCurrentInstance, ref } from 'vue';
 import axios from 'axios';
 
 let users = ref([])
-let voiceStatus = ref([])
 
 export default{
     methods:{
@@ -14,77 +13,39 @@ export default{
                 users.value = data;
             }
             )
+            console.log(users.value)
         },
-        async sendDeafenRequest(userId){
+        async getUserInfo(){
+            await this.getActiveUsers()
+        }
+        ,
+        async sendDeafenRequest(user){
             await axios.post('http://localhost:3000/deafen', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    userId: userId
-                })
+               userId: user.id
             }).then((response) => {
                 return console.log(response);
             })
         },
         async sendUndeafenRequest(userId){
             await axios.post('http://localhost:3000/undeafen', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    userId: userId
-                })
+               userId: userId.id
             }).then((response) => {
                 return console.log(response);
             })
         },
-        async sendMuteRequest(userId){
-            await axios.post('http://localhost:3000/mute', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    userId: userId
-                })
+        async sendMuteRequest(user){
+            await axios.post('http://localhost:3000/mute',{
+                userId: user.id
             }).then((response) => {
                 return console.log(response);
             })
         },
-        async sendUnmuteRequest(userId){
+        async sendUnmuteRequest(user){
             await axios.post('http://localhost:3000/unmute', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    userId: userId
-                })
+                userId: user.id
             }).then((response) => {
                 return console.log(response);
             })
-        },
-
-        async getVoiceStatus(){
-            await fetch('http://localhost:3000/voiceStatus').then((response) => {
-                return response.json();
-            }).then((data) => {
-                voiceStatus.value = data;
-            })
-        }
-        ,
-
-        checkUserMuteStatus(user){
-            let userVoiceStatus = voiceStatus.value.find((voiceStatus) => voiceStatus.userId === user.id)
-            if(userVoiceStatus.isMuted === true){
-                return true
-            }
-            else{
-                return false
-            }
         }
         ,
         pollData (func_to_call, interval) {
@@ -119,7 +80,6 @@ export default{
     created ()
     {
         this.pollData(this.getActiveUsers, 1000);
-        // this.pollData(this.getVoiceStatus, 1000);
     },
 
     beforeDestroy()
@@ -138,7 +98,7 @@ export default{
     <VaCardContent class="flex space-x-10 h-full">
         <VaList>
             <VaListItem v-for="user in users" :key="user.id" class="pb-2 w-full">
-                <div class="grid grid-cols-2 items-center justify-center gap-36">
+                <div class="grid grid-cols-2 items-center justify-center gap-44">
                     <div>
                         <VaListItemAvatar class="pr-2">
                             <VaAvatar class="pr-2">
@@ -149,11 +109,20 @@ export default{
                             <VaListItemTitle>{{user.username}}</VaListItemTitle>
                         </VaListItemText>
                     </div>
-                    <div>
-                        <VaButton @click="kickUser(user)"><VaIcon name="remove"></VaIcon></VaButton>
-                        <VaButton><VaIcon name="block"></VaIcon></VaButton>
-                        <VaButton @click="sendMuteRequest(user)"><VaIcon name="mic_off"></VaIcon></VaButton>
-                        <VaButton @click="deafenUser(user)"><VaIcon name="headset_off"></VaIcon></VaButton>
+                    <div class="grid grid-cols-3">
+                        <div v-if="!user.isMuted">
+                            <VaButton @click="sendMuteRequest(user)"><VaIcon name="mic"></VaIcon></VaButton>
+                        </div>
+                        <div v-else>
+                            <VaButton @click="sendUnmuteRequest(user)"><VaIcon name="mic_off"></VaIcon></VaButton>
+                        </div>
+                        <div v-if="!user.isDeafened">
+                            <VaButton @click="sendDeafenRequest(user)"><VaIcon name="headset"></VaIcon></VaButton>
+                        </div>
+                        <div v-else>
+                            <VaButton @click="sendUndeafenRequest(user)"><VaIcon name="headset_off"></VaIcon></VaButton>
+                        </div>
+                        <VaButton @click="kickUser(user)"><VaIcon name="block"></VaIcon></VaButton>
                     </div>                  
                 </div>
                 
