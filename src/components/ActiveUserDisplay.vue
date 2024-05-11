@@ -3,6 +3,7 @@ import { getCurrentInstance, ref } from 'vue';
 import axios from 'axios';
 
 let users = ref([])
+let voiceStatus = ref([])
 
 export default{
     methods:{
@@ -15,7 +16,7 @@ export default{
             )
         },
         async sendDeafenRequest(userId){
-            await fetch('http://localhost:3000/deafen', {
+            await axios.post('http://localhost:3000/deafen', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -27,8 +28,8 @@ export default{
                 return console.log(response);
             })
         },
-        sendUndeafenRequest(userId){
-            fetch('http://localhost:3000/undeafen', {
+        async sendUndeafenRequest(userId){
+            await axios.post('http://localhost:3000/undeafen', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -53,8 +54,8 @@ export default{
                 return console.log(response);
             })
         },
-        sendUnmuteRequest(userId){
-            fetch('http://localhost:3000/unmute', {
+        async sendUnmuteRequest(userId){
+            await axios.post('http://localhost:3000/unmute', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -65,6 +66,25 @@ export default{
             }).then((response) => {
                 return console.log(response);
             })
+        },
+
+        async getVoiceStatus(){
+            await fetch('http://localhost:3000/voiceStatus').then((response) => {
+                return response.json();
+            }).then((data) => {
+                voiceStatus.value = data;
+            })
+        }
+        ,
+
+        checkUserMuteStatus(user){
+            let userVoiceStatus = voiceStatus.value.find((voiceStatus) => voiceStatus.userId === user.id)
+            if(userVoiceStatus.isMuted === true){
+                return true
+            }
+            else{
+                return false
+            }
         }
         ,
         pollData (func_to_call, interval) {
@@ -99,6 +119,7 @@ export default{
     created ()
     {
         this.pollData(this.getActiveUsers, 1000);
+        // this.pollData(this.getVoiceStatus, 1000);
     },
 
     beforeDestroy()
@@ -116,19 +137,26 @@ export default{
     <VaCardTitle>Active Users</VaCardTitle>
     <VaCardContent class="flex space-x-10 h-full">
         <VaList>
-            <VaListItem v-for="user in users" :key="user.id">
-                <VaListItemAvatar>
-                    <VaAvatar class="pr-2">
-                        <img :src="user.avatar" alt="user avatar" />
-                    </VaAvatar>
-                </VaListItemAvatar>
-                <VaListItemText>
-                    <VaListItemTitle>{{user.username}}</VaListItemTitle>
-                </VaListItemText>
-                <VaButton @click="kickUser(user)"><VaIcon name="remove"></VaIcon></VaButton>
-                <VaButton><VaIcon name="block"></VaIcon></VaButton>
-                <VaButton @click="sendMuteRequest(user)"><VaIcon name="mic_off"></VaIcon></VaButton>
-                <VaButton @click="deafenUser(user)"><VaIcon name="headset_off"></VaIcon></VaButton>
+            <VaListItem v-for="user in users" :key="user.id" class="pb-2 w-full">
+                <div class="grid grid-cols-2 items-center justify-center gap-36">
+                    <div>
+                        <VaListItemAvatar class="pr-2">
+                            <VaAvatar class="pr-2">
+                                <img :src="user.avatar" alt="user avatar" />
+                            </VaAvatar>
+                        </VaListItemAvatar>
+                        <VaListItemText>
+                            <VaListItemTitle>{{user.username}}</VaListItemTitle>
+                        </VaListItemText>
+                    </div>
+                    <div>
+                        <VaButton @click="kickUser(user)"><VaIcon name="remove"></VaIcon></VaButton>
+                        <VaButton><VaIcon name="block"></VaIcon></VaButton>
+                        <VaButton @click="sendMuteRequest(user)"><VaIcon name="mic_off"></VaIcon></VaButton>
+                        <VaButton @click="deafenUser(user)"><VaIcon name="headset_off"></VaIcon></VaButton>
+                    </div>                  
+                </div>
+                
             </VaListItem>
         </VaList>
     </VaCardContent>

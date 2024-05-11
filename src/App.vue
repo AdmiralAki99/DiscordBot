@@ -3,11 +3,13 @@
   import QueueDisplay from './components/QueueDisplay.vue';
   import CurrentMetadata from './components/CurrentMetadata.vue';
   import ActiveUserDisplay from './components/ActiveUserDisplay.vue';
+  import UserRequestLogs from './components/UserRequestLogs.vue';
   export default {
     components: {
       QueueDisplay,
       CurrentMetadata,
-      ActiveUserDisplay
+      ActiveUserDisplay,
+      UserRequestLogs
     }
   }
 </script>
@@ -21,7 +23,7 @@
         <div>Element 2</div>
         <div><CurrentMetadata/></div>
         <div class="row-start-2 row-end-4"><QueueDisplay/></div>
-        <div class="row-span-3">User Request Info</div>
+        <div class="row-span-3 w-full"><UserRequestLogs/></div>
       </div>
     </div>
   </div>

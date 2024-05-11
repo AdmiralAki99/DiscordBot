@@ -7,6 +7,7 @@ let requester = ref("")
 let shuffle = ref(false)
 let repeatPlaylist = ref(false)
 let playbackStatus = ref("")
+let groupId = ref(0)
 
 export default{
     methods:{
@@ -30,10 +31,16 @@ export default{
 
             })
         },
-        pollData (func_to_call, interval) {
+        startPolling() {
             this.polling = setInterval(() => {
-                func_to_call()
-            }, interval)
+                this.getStatus();
+                }, 1000);
+            console.log('Polling started');
+        },
+        
+        stopPolling() {
+            clearInterval(this.polling);
+            console.log('Polling stopped');
         },
         async resumeSong(){
             await fetch('http://localhost:3000/resume').then((response) => {
@@ -48,6 +55,13 @@ export default{
             }).then((data) => {
                 console.log(data)
             })
+        },
+        async skipSong(){
+            await fetch('http://localhost:3000/skip').then((response) => {
+                return response.json();
+            }).then((data) => {
+                console.log(data)
+            })
         }
     },
 
@@ -57,14 +71,17 @@ export default{
             shuffle,
             repeatPlaylist,
             currentSong,
-            requester
+            requester,
+            playbackStatus
         }
     },
+
     created(){
-        this.pollData(this.getStatus, 1000);
+        this.startPolling()
     },
+
     beforeDestroy(){
-        clearInterval(this.polling)
+        this.stopPolling()
     }
 }
 
@@ -116,8 +133,13 @@ export default{
                 <VaButtonGroup round>
                     <VaButton><VaIcon name="shuffle"></VaIcon></VaButton>
                     <VaButton><VaIcon name="skip_previous"></VaIcon></VaButton>
-                    <VaButton @click="resumeSong"><VaIcon :name="(playbackStatus == 'Stopped') ? 'pause' : 'play_arrow'"></VaIcon></VaButton>
-                    <VaButton><VaIcon name="skip_next"></VaIcon></VaButton>
+                    <div v-if="playbackStatus == 'Paused'">
+                        <VaButton @click="resumeSong"><VaIcon name="play_arrow"></VaIcon></VaButton>
+                    </div>
+                    <div v-else>
+                        <VaButton @click="pauseSong"><VaIcon name="pause"></VaIcon></VaButton>
+                    </div>
+                    <VaButton @click = "skipSong"><VaIcon name="skip_next"></VaIcon></VaButton>
                     <VaButton><VaIcon name="repeat"></VaIcon></VaButton>
                 </VaButtonGroup>
             </div>
