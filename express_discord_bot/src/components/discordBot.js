@@ -5,6 +5,7 @@ import play from 'play-dl';
 import 'yt-search'
 import yts from 'yt-search'
 import {Queue} from './queue.js'
+import { Logger } from './logger.js';
 import {DiscordUser} from './discordUser.js'
 import { Song } from './Song.js'
 import {rollDice} from './diceparser.js'
@@ -32,6 +33,7 @@ class DiscordBot{
         this.activeVoiceChannel = null
         this.playbackStatus = "Paused"
         this.requestsFromUser = {}
+        this.logger = new Logger()
     }
 
     getStatus = async ()=>{
@@ -105,6 +107,10 @@ class DiscordBot{
         return activeUsers
     }
 
+    getAdminLogs(){
+        return JSON.stringify(this.logger.getLogs())
+    }
+
     adminDeafenUser = async (userId)=>{
         let result = false
         this.client.guilds.cache.get(this.guildId).channels.cache.forEach((channel)=>{
@@ -117,6 +123,9 @@ class DiscordBot{
                 })
             }
         })
+
+        this.logger.logUserDeafen(`User ${userId} deafened by admin`,'Admin')
+
         return result
     }
 
@@ -132,6 +141,9 @@ class DiscordBot{
                 })
             }
         })
+
+        this.logger.logUserUndeafen(`User ${userId} undeafened by admin`,'Admin')
+
         return result
     }
 
@@ -148,6 +160,9 @@ class DiscordBot{
                 })
             }
         })
+
+        this.logger.logUserMute(`User ${userId} muted by admin`,'Admin')
+
         return result
     }
 
@@ -163,6 +178,9 @@ class DiscordBot{
                 })
             }
         })
+
+        this.logger.logUserUnmute(`User ${userId} unmuted by admin`,'Admin')
+
         return result
     }
 
@@ -178,6 +196,9 @@ class DiscordBot{
                 })
             }
         })
+
+        this.logger.logUserKick(`User ${userId} kicked by admin`,'Admin')
+
         return result
     }
 
@@ -185,6 +206,8 @@ class DiscordBot{
         if(index < 0 || index >= this.songQueue.size()) return false
 
         this.songQueue.removeAtIndex(index)
+
+        this.logger.logSongDequeue(`Song ${this.songQueue.getItemAtIndex(index)} removed from queue`,'Admin')
 
         return true
     }
@@ -265,37 +288,46 @@ class DiscordBot{
     pausePlayback = async (interaction)=>{
         this.musicPlayer.pause()
         this.playbackStatus = "Paused"
+        this.logger.logSongPause(`Playback paused by ${interaction.user.username}`,interaction.user.username)
         interaction.reply(`Playback paused by ${interaction.user.username}`)
     }
 
     adminPausePlayback = async ()=>{
         this.musicPlayer.pause()
         this.playbackStatus = "Paused"
+
+        this.logger.logSongPause(`Playback paused by Admin`,'Admin')
         return true
     }
 
     adminResumePlayback = async ()=>{
         this.musicPlayer.unpause()
         this.playbackStatus = "Playing"
+
+        this.logger.logSongResume(`Playback resumed by Admin`,'Admin')
         return true
     }
 
     adminSkipPlayback = async ()=>{
         this.musicPlayer.stop()
         this.musicPlayer.unpause()
+
+        this.logger.logSongSkip(`Song skipped by Admin`,'Admin')
         return true
     }
 
     resumePlayback = async (interaction)=>{
         this.musicPlayer.unpause()
         this.playbackStatus = "Playing"
+        this.logger.logSongResume(`Playback resumed by ${interaction.user.username}`,interaction.user.username)
         interaction.reply(`Playback resumed by ${interaction.user.username}`)
     }
 
     skipSong = async (interaction)=>{
-       this.musicPlayer.stop()
-       this.musicPlayer.unpause()
-       interaction.reply(`Song skipped by ${interaction.user.username}`)
+        this.musicPlayer.stop()
+        this.musicPlayer.unpause()
+        this.logger.logSongSkip(`Song skipped by ${interaction.user.username}`,interaction.user.username)
+        interaction.reply(`Song skipped by ${interaction.user.username}`)
     }
 
     removeSongFromQueue = async () => {
@@ -316,13 +348,15 @@ class DiscordBot{
     stopPlayer = async (interaction)=>{
         this.musicPlayer.stop()
         this.playbackStatus = "Paused"
-        interaction.reply(`Playback stopped by ${interaction.user.username}`)
+        this.logger.logSongStop(`Playback stopped by ${interaction.user.username}`,interaction.user.username)
+        interaction.reply(`Playback stopped & cleared by ${interaction.user.username}`)
         this.songQueue.clearQueue()
     }
 
     adminStopPlayback = async ()=>{
         this.musicPlayer.stop()
         this.playbackStatus = "Paused"
+        this.logger.logSongStop(`Playback stopped & cleared by Admin`,'Admin')
         this.songQueue.clearQueue()
         return true
     }
@@ -338,11 +372,14 @@ class DiscordBot{
     adminQueueSong = async (query)=>{
         let song = await this.adminMusicSearch(query)
 
+        logger.logSongSearch(`Song ${song.title} by ${song.artist} requested by Admin`,'Admin')
+
         if( this.songQueue.size() === 0){
             // await  this.addToQueue(song)
 
         }else{
             await  this.addToQueue(song)
+            this.logger.logSongEnqueue(`Song ${song.title} by ${song.artist} added to queue`,'Admin')
             return true
         }
     }
@@ -353,6 +390,8 @@ class DiscordBot{
         const metadata = await play.search(query, { limit: 1 })
 
         const song = new Song(metadata[0].title,metadata[0].channel.name,metadata[0].durationInSec,metadata[0].url,metadata[0].thumbnails[0].url,interaction.user.username)
+
+        this.logger.logSongSearch(`Song ${song.title} by ${song.artist} requested by ${interaction.user.username}`,interaction.user.username)
     
         return song
     }
@@ -361,6 +400,8 @@ class DiscordBot{
         const metadata = await play.video_info(link)
     
         const song = new Song(metadata.video_details.title,metadata.video_details.channel.name,metadata.video_details.durationInSec,metadata.video_details.url,metadata.video_details.thumbnails[0].url,"Admin")
+
+        this.logger.logSongSearch(`Song ${song.title} by ${song.artist} requested by Admin`,'Admin')
     
         return song
     }
@@ -369,6 +410,8 @@ class DiscordBot{
         const metadata = await play.video_info(link)
     
         const song = new Song(metadata.video_details.title,metadata.video_details.channel.name,metadata.video_details.durationInSec,metadata.video_details.url,metadata.video_details.thumbnails[0].url,interaction.user.username)
+
+        this.logger.logSongSearch(`Song ${song.title} by ${song.artist} requested by ${interaction.user.username}`,interaction.user.username)
     
         return song
     }
@@ -385,6 +428,8 @@ class DiscordBot{
         const songs = await Promise.all(searchPromise)
 
         songList.push(...songs)
+
+        this.logger.logPlaylistSearched(`Playlist searched by ${interaction.user.username}`,interaction.user.username)
 
         return songList
     }
@@ -421,6 +466,7 @@ class DiscordBot{
             await playPromise;
             this.removeSongFromQueue()
             this.recentlyPlayed = song
+            this.logger.logSongDequeue(`Song ${song.title} by ${song.artist} dequeued from queue`,'Admin')
         }
     }
     
@@ -430,18 +476,24 @@ class DiscordBot{
         this.currentlyPlaying = true
 
         this.playbackStatus = "Playing"
+
+        this.logger.log("Starting Playback",'system')
         
         await  this.cycleQueue(interaction).then(()=>{
             this.currentlyPlaying = false
         })
 
         this.playbackStatus = "Paused"
+
+        this.logger.log("Playback Finished",'system')
        
     }
 
     addToQueue = async (song) => {
 
         this.songQueue.enqueue(song);
+
+        this.logger.logSongEnqueue(`Song ${song.title} by ${song.artist} added to queue`,song.requester)
     
         return song;
     };
@@ -463,6 +515,8 @@ class DiscordBot{
                 if(index < 10) queueMessage += `${index+1}. ${song.getMetadata()}\n`
             })
         }
+
+        this.logger.log("Queue displayed",'system')
     
         message.reply(queueMessage)
     }
@@ -516,6 +570,8 @@ class DiscordBot{
 
         let resp = JSON.stringify(queue)
 
+        this.logger.log("API Queue requested",'system')
+
         return resp
     }
 
@@ -524,10 +580,13 @@ class DiscordBot{
 
         interaction.reply(`Dice Roll of: ${query}\nDice Value is: ${val.sum}`)
 
+        this.logger.log(`Dice Roll of: ${query}\nDice Value is: ${val.sum}`,'system')
+
         return JSON.stringify(val)
     }
 
     play = async (query, interaction)=>{
+        this.logger.logSongSearch(`Song playback requested by ${interaction.user.username}`,interaction.user.username)
         if(query.includes('https://')){
             if (query.includes('list=')){
                 let songs = await this.playlistSearch(query,interaction)
@@ -571,6 +630,7 @@ class DiscordBot{
     run = async ()=>{
         this.client.once('ready',()=>{
             console.log('Bot is ready')
+            this.logger.log("Bot is ready",'system')
         })
 
         this.client.on('messageCreate', async (message) => {

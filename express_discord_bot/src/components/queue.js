@@ -63,6 +63,10 @@ class Queue {
         return queue
     }
 
+    getItemAtIndex(index){
+        return this.items[index]
+    }
+
     clearQueue(){
         this.items = []
     }

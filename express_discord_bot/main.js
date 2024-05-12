@@ -164,6 +164,10 @@ app.get('/users',async(req,res)=>{
     res.send(await bot.getActiveUsersOnVoiceChannel())
 })
 
+app.get('/admin/logs',async(req,res)=>{
+    res.send(await bot.getAdminLogs())
+})
+
 app.listen(3000, ()=>{
     console.log('Listening on port 3000');
     bot.run()
