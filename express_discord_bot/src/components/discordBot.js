@@ -65,10 +65,16 @@ class DiscordBot{
         this.client.guilds.cache.get(this.guildId).channels.cache.forEach((channel)=>{
             if(channel.type == 2){
                 channel.members.forEach((member)=>{
-                    users.push(new DiscordUser(member.user.id,member.user.username,false,member.voice.serverMute,member.voice.serverDeaf))
+                    if(member.id == this.client.user.id){
+
+                    }else{
+                        users.push(new DiscordUser(member.user.id,member.user.username,false,member.voice.serverMute,member.voice.serverDeaf))
+                    }
                 })
             }
         })
+
+        return JSON.stringify(users)
 
         
     }
@@ -90,7 +96,7 @@ class DiscordBot{
             if(channel.type == 2){
                 channel.members.forEach((member)=>{
                     if(member.id != this.client.user.id){
-                        activeUsers.push({username:member.user.username,id:member.user.id,channel:channel.name,avatar:member.user.avatarURL({dynamic:true}),accentColour:member.displayColor})
+                        activeUsers.push({username:member.user.username,id:member.user.id,channel:channel.name,avatar:member.user.avatarURL({dynamic:true}),accentColour:member.displayColor,isMuted:member.voice.serverMute,isDeafened:member.voice.serverDeaf})
                     }
                 })
             }
@@ -135,6 +141,7 @@ class DiscordBot{
             if(channel.type == 2){
                 channel.members.forEach((member)=>{
                     if(member.id == userId){
+                        console.log("Muting user: ", member.user.username)
                         member.voice.setMute(true)
                         result = true
                     }
@@ -172,6 +179,14 @@ class DiscordBot{
             }
         })
         return result
+    }
+
+    adminRemoveSongFromQueue = async (index)=>{
+        if(index < 0 || index >= this.songQueue.size()) return false
+
+        this.songQueue.removeAtIndex(index)
+
+        return true
     }
 
     deployCommands = async (message)=>{
@@ -497,7 +512,7 @@ class DiscordBot{
     }
 
     getQueue = async ()=>{
-        let queue = this.songQueue.getQueue()
+        let queue = this.songQueue.getQueueAPI()
 
         let resp = JSON.stringify(queue)
 

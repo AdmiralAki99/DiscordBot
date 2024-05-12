@@ -141,12 +141,19 @@ app.post('/youtube/search', async (req,res)=>{
     }
 })
 
-app.get('/status',async (req,res)=>{
-    res.send(await bot.getStatus())
+app.post('/music/remove', async (req,res)=>{
+    let index = req.body.index
+    let result = await bot.adminRemoveSongFromQueue(index)
+
+    if (result){
+        res.send('Song removed')
+    }else{
+        res.send('Song not removed')
+    }
 })
 
-app.post('/mute', async (req,res)=>{
-
+app.get('/status',async (req,res)=>{
+    res.send(await bot.getStatus())
 })
 
 app.get('/voiceStatus',async(req,res)=>{

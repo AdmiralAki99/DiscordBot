@@ -17,7 +17,14 @@ export default{
         this.polling = setInterval(() => {
           func_to_call()
         }, interval)
-      }
+    },
+    async removeSongFromIndex(index){
+      await axios.post('http://localhost:3000/music/remove',{
+        index: index
+      }).then((response) => {
+        console.log(response)
+      })
+    }
     },
   data(){
     return{
@@ -64,17 +71,33 @@ export default{
         <VaListItem
           v-for="song in queue"
           :key="song.id" class="pb-5">
-          <VaListItemAvatar>
-            <VaAvatar class="pr-2">
-              <img :src="song.thumbnail" alt="album art" />
-            </VaAvatar>
-          </VaListItemAvatar>
-          <VaListItemText class="pr-2">
-            <VaListItemTitle>{{ song.title }}</VaListItemTitle>
-          </VaListItemText>
-          <VaButton icon>
-            <VaIcon name="delete"></VaIcon>
-          </VaButton>
+          <div class="grid grid-cols-4 grid-rows-1 gap-10">
+              <div class="col-span-3">
+                <VaListItemAvatar>
+                  <VaAvatar class="pr-2">
+                    <img :src="song.thumbnail" alt="album art" />
+                  </VaAvatar>
+                </VaListItemAvatar>
+                <VaListItemText class="pr-2 text-wrap">
+                  <VaListItemTitle>{{ song.title }}</VaListItemTitle>
+                </VaListItemText>
+              </div>
+                <div>
+                  <div v-if="song.index == 0">
+                    <VaButton disabled>
+                      <VaIcon name="delete"></VaIcon>
+                    </VaButton>
+                  </div>
+                  <div v-else>
+                    <VaButton icon>
+                      <VaIcon @click="removeSongFromIndex(song.index)" name="delete"></VaIcon>
+                    </VaButton>
+                  </div>
+                </div>
+          </div>
+          
+        
+
         </VaListItem>
       </VaList>
     </VaCardContent>

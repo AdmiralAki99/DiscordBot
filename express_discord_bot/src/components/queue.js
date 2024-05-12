@@ -1,3 +1,5 @@
+import { atRule } from "postcss";
+
 class Queue {
     constructor() {
       this.items = [];
@@ -51,6 +53,14 @@ class Queue {
 
     getQueue(){
         return this.items
+    }
+
+    getQueueAPI(){
+      let queue = []
+      this.items.forEach((item,index)=>{
+          queue.push({index:index, title:item.title, artist: item.artist,url:item.url,thumbnail:item.thumbnail,requester:item.requester})
+      })
+        return queue
     }
 
     clearQueue(){
