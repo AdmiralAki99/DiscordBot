@@ -587,43 +587,49 @@ class DiscordBot{
 
     play = async (query, interaction)=>{
         this.logger.logSongSearch(`Song playback requested by ${interaction.user.username}`,interaction.user.username)
-        if(query.includes('https://')){
-            if (query.includes('list=')){
-                let songs = await this.playlistSearch(query,interaction)
-                if( this.songQueue.size() === 0){
-                    interaction.reply(`Playing playlist`)
-                    songs.forEach(async (song)=>{
-                        await  this.addToQueue(song)
-                    })
-                    await  this.playSongFromQueue(interaction)
+        try {
+            if(query.includes('https://')){
+                if (query.includes('list=')){
+                    let songs = await this.playlistSearch(query,interaction)
+                    if( this.songQueue.size() === 0){
+                        interaction.reply(`Playing playlist`)
+                        songs.forEach(async (song)=>{
+                            await  this.addToQueue(song)
+                        })
+                        await  this.playSongFromQueue(interaction)
+                    }else{
+                        songs.forEach(async (song)=>{
+                            await  this.addToQueue(song)
+                        })
+                        interaction.reply(`Added playlist to queue`)
+                    }
                 }else{
-                    songs.forEach(async (song)=>{
+                    let song = await  this.linkSearch(query,interaction)
+                    if( this.songQueue.size() === 0){
+                        interaction.reply(`Playing ${song.title}`)
                         await  this.addToQueue(song)
-                    })
-                    interaction.reply(`Added playlist to queue`)
+                        await  this.playSongFromQueue(interaction)
+                    }else{
+                        await  this.addToQueue(song)
+                        interaction.reply(`Added ${song.title} to queue`)
+                    }
                 }
             }else{
-                let song = await  this.linkSearch(query,interaction)
-                if( this.songQueue.size() === 0){
-                    interaction.reply(`Playing ${song.title}`)
-                    await  this.addToQueue(song)
-                    await  this.playSongFromQueue(interaction)
-                }else{
-                    await  this.addToQueue(song)
-                    interaction.reply(`Added ${song.title} to queue`)
-                }
-            }
-        }else{
-            let song = await  this.musicSearch(query,interaction)
+                let song = await  this.musicSearch(query,interaction)
 
-            if( this.songQueue.size() === 0){
-                interaction.reply(`Playing ${song.title} by ${song.artist}`)
-                await  this.addToQueue(song)
-                await  this.playSongFromQueue(interaction)
-            }else{
-                await  this.addToQueue(song)
-                interaction.reply(`Added ${song.title} by ${song.artist} to queue`)
+                if( this.songQueue.size() === 0){
+                    interaction.reply(`Playing ${song.title} by ${song.artist}`)
+                    await  this.addToQueue(song)
+                    await  this.playSongFromQueue(interaction)
+                }else{
+                    await  this.addToQueue(song)
+                    interaction.reply(`Added ${song.title} by ${song.artist} to queue`)
+                }
             }
+        } catch (error) {
+            console.error(error)
+            // May respond to user - Could be dangerous
+            // interaction.reply("Unexpected Error")
         }
     }
     
