@@ -4,12 +4,14 @@
   import CurrentMetadata from './components/CurrentMetadata.vue';
   import ActiveUserDisplay from './components/ActiveUserDisplay.vue';
   import UserRequestLogs from './components/UserRequestLogs.vue';
+  import LogsComponent from './components/LogsComponent.vue'
   export default {
     components: {
       QueueDisplay,
       CurrentMetadata,
       ActiveUserDisplay,
-      UserRequestLogs
+      UserRequestLogs,
+      LogsComponent
     }
   }
 </script>
@@ -20,7 +22,7 @@
       <h1 class="text-white text-5xl pb-5">Admin Dashboard</h1>
       <div class="grid grid-cols-3 gap-4 h-svh">
         <div><ActiveUserDisplay/></div>
-        <div>Element 2</div>
+        <div><LogsComponent/></div>
         <div><CurrentMetadata/></div>
         <div class="row-start-2 row-end-4"><QueueDisplay/></div>
         <div class="row-span-3 w-full"><UserRequestLogs/></div>

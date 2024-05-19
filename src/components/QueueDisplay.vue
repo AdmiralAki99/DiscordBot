@@ -95,9 +95,6 @@ export default{
                   </div>
                 </div>
           </div>
-          
-        
-
         </VaListItem>
       </VaList>
     </VaCardContent>

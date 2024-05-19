@@ -17,7 +17,8 @@ class Logger{
             'level':'song_enqueue',
             'message':message
             ,'timestamp':new Date().toISOString(),
-            'user': user
+            'user': user,
+            'message': `Song Enqueued by ${user}`
         }
 
         this.logs.push(log);
@@ -28,7 +29,8 @@ class Logger{
             'level':'playlist_searched',
             'message':message
             ,'timestamp':new Date().toISOString(),
-            'user':user
+            'user':user,
+            'message': `Playlist Searched by ${user}`
         }
         this.logs.push(log);
     }
@@ -38,7 +40,8 @@ class Logger{
             'level':'song_dequeue',
             'message':message
             ,'timestamp':new Date().toISOString(),
-            'user':user
+            'user':user,
+            'message': `Song Dequeued`
         }
         this.logs.push(log);
     }
@@ -48,7 +51,8 @@ class Logger{
             'level':'user_mute',
             'message':message
             ,'timestamp':new Date().toISOString(),
-            'user':user
+            'user':user,
+            'message': `Admin Muted ${user}`
         }
         this.logs.push(log);
     }
@@ -58,7 +62,8 @@ class Logger{
             'level':'user_unmute',
             'message':message
             ,'timestamp':new Date().toISOString(),
-            'user':user
+            'user':user,
+            'message': `Admin Unmuted ${user}`
         }
         this.logs.push(log);
     }
@@ -68,7 +73,8 @@ class Logger{
             'level':'user_deafen',
             'message':message
             ,'timestamp':new Date().toISOString(),
-            'user':user
+            'user':user,
+            'message': `Admin Deafened ${user}`
         }
         this.logs.push(log);
     }
@@ -78,7 +84,8 @@ class Logger{
             'level':'user_undeafen',
             'message':message
             ,'timestamp':new Date().toISOString(),
-            'user':user
+            'user':user,
+            'message': `Admin Undeafened ${user}`
         }
         this.logs.push(log);
     }
@@ -88,7 +95,8 @@ class Logger{
             'level':'user_kick',
             'message':message
             ,'timestamp':new Date().toISOString(),
-            'user':user
+            'user':user,
+            'message': `Admin Kicked ${user}`
         }
         this.logs.push(log);
     }
@@ -98,7 +106,8 @@ class Logger{
             'level':'song_finish',
             'message':message
             ,'timestamp':new Date().toISOString(),
-            'user':user
+            'user':user,
+            "message": `Song Finished`
         }
         this.logs.push(log);
     }
@@ -108,7 +117,8 @@ class Logger{
             'level':'song_skip',
             'message':message
             ,'timestamp':new Date().toISOString(),
-            'user':user
+            'user':user,
+            "message": `${user} skipped the song`
         }
         this.logs.push(log);
     }
@@ -118,7 +128,8 @@ class Logger{
             'level':'song_pause',
             'message':message
             ,'timestamp':new Date().toISOString(),
-            'user':user
+            'user':user,
+            "message": `${user} paused the song`
         }
         this.logs.push(log);
     }
@@ -128,7 +139,8 @@ class Logger{
             'level':'song_resume',
             'message':message
             ,'timestamp':new Date().toISOString(),
-            'user':user
+            'user':user,
+            'message': `${user} resumed the song`
         }
         this.logs.push(log);
     }
@@ -138,7 +150,8 @@ class Logger{
             'level':'song_search',
             'message':message
             ,'timestamp':new Date().toISOString(),
-            'user':user
+            'user':user,
+            'message': `Song Searched by ${user}`
         }
         this.logs.push(log);
     }
@@ -148,7 +161,8 @@ class Logger{
             'level':'song_stop',
             'message':message
             ,'timestamp':new Date().toISOString(),
-            'user':user
+            'user':user,
+            'message': `${user} stopped playback`
         }
         this.logs.push(log);
     }

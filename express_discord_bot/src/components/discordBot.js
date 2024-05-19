@@ -153,7 +153,6 @@ class DiscordBot{
             if(channel.type == 2){
                 channel.members.forEach((member)=>{
                     if(member.id == userId){
-                        console.log("Muting user: ", member.user.username)
                         member.voice.setMute(true)
                         result = true
                     }
