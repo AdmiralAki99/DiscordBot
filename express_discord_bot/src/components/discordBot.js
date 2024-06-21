@@ -2,13 +2,14 @@ import { Client,GatewayIntentBits,GuildMember,ActionRowBuilder, ButtonBuilder, B
 import {joinVoiceChannel,getVoiceConnection,createAudioPlayer,createAudioResource} from '@discordjs/voice'
 import { configDotenv, parse } from 'dotenv'
 import play from 'play-dl';
-import 'yt-search'
+import 'ytdl-core'
 import yts from 'yt-search'
 import {Queue} from './queue.js'
 import { Logger } from './logger.js';
 import {DiscordUser} from './discordUser.js'
 import { Song } from './Song.js'
 import {rollDice} from './diceparser.js'
+import ytdl from 'ytdl-core';
 
 configDotenv()
 
@@ -21,9 +22,10 @@ class DiscordBot{
         this.currentlyPlaying = false
         this.client = new Client({intents:[
             GatewayIntentBits.Guilds,
-            GatewayIntentBits.GuildVoiceStates,
             GatewayIntentBits.GuildMessages,
-            GatewayIntentBits.MessageContent
+            GatewayIntentBits.GuildVoiceStates,
+            GatewayIntentBits.GuildMembers,
+            GatewayIntentBits.MessageContent,
         ]})
         this.bot_admins = ["119005036150784005", "558358512858824704"]
         this.non_voice_commands = ["kill-server", "roll"]
@@ -438,7 +440,13 @@ class DiscordBot{
     
             const song = this.songQueue.peek()
     
-            let stream = await play.stream(song.url)
+            // let stream = await play.stream(song.url)
+            let stream = ytdl(song.url, 
+                {   filter: "audioonly",
+                    quality: 'highestaudio',
+                    highWaterMark: 1 << 25,
+                    dlChunkSize: 0,
+                })
         
             const voiceConnection = joinVoiceChannel({
                 channelId:interaction.member.voice.channel.id,
@@ -448,12 +456,12 @@ class DiscordBot{
 
             this.activeVoiceChannel = interaction.member.voice.channel.id
         
-            let resource = createAudioResource(stream.stream, {
-                inputType: stream.type
-            })
-        
+            let resource = createAudioResource(stream)
             const playPromise = new Promise((resolve, reject) => {
                 this.musicPlayer.play(resource);
+                this.musicPlayer.on('ready', () => {
+                    console.log('Ready!');
+                })
                 this.musicPlayer.on('idle', () => {
                     resolve();
                 });
@@ -664,6 +672,11 @@ class DiscordBot{
                 return interaction.reply('You need to be in a voice channel')
             }
 
+            const permissions = interaction.member.voice.channel.permissionsFor(interaction.client.user);
+            if (!permissions.has('CONNECT') || !permissions.has('SPEAK')) {
+                return interaction.reply('I need the permissions to join and speak in your voice channel!');
+            }
+            
             this.guildId = interaction.guildId
 
             this.logUserRequest(interaction)
@@ -705,6 +718,7 @@ class DiscordBot{
                     if(this.bot_admins.includes(interaction.user.id))
                     {
                         await interaction.reply(`Killing server! Goodbye ${interaction.user.username} :)`)
+                        await interaction.guild.leave()
                         process.exit(0);
                         break; // Should never make it here
                     }
