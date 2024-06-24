@@ -33,6 +33,7 @@ class DiscordBot{
         this.repeat_playlist = 0 // Property for telling to to repeat_playlist
         this.guildId = null
         this.activeVoiceChannel = null
+        this.voiceConnection = null
         this.playbackStatus = "Paused"
         this.requestsFromUser = {}
         this.logger = new Logger()
@@ -455,6 +456,7 @@ class DiscordBot{
             })
 
             this.activeVoiceChannel = interaction.member.voice.channel.id
+            this.voiceConnection = voiceConnection
         
             let resource = createAudioResource(stream)
             const playPromise = new Promise((resolve, reject) => {
@@ -718,7 +720,11 @@ class DiscordBot{
                     if(this.bot_admins.includes(interaction.user.id))
                     {
                         await interaction.reply(`Killing server! Goodbye ${interaction.user.username} :)`)
-                        await interaction.guild.leave()
+                        // leave voice channel
+                        if(this.voiceConnection){
+                            await this.voiceConnection.destroy()
+                            await this.voiceConnection.disconnect()
+                        }
                         process.exit(0);
                         break; // Should never make it here
                     }
